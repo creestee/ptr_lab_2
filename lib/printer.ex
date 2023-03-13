@@ -10,8 +10,13 @@ defmodule Printer do
   end
 
   def handle_cast({:print, message}, _) do
-    Process.sleep(Enum.random(500..2000))
+    Process.sleep(Enum.random(500..1200))
     IO.inspect "#{inspect self()} -- #{message}"
+    {:noreply, nil}
+  end
+
+  def handle_cast(:crash, _) do
+    Process.exit(self(), :kill)
     {:noreply, nil}
   end
 end

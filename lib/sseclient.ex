@@ -1,15 +1,14 @@
 defmodule SseClient do
   use GenServer
+  require Logger
 
-  def start(url) do
-    WorkerPool.start_link(3)
-    {:ok, pid_mediator} = Mediator.start()
+  def start_link([url, pid_mediator]) do
     {:ok, pid_analyzer} = AnalyzeTweets.start()
     GenServer.start_link(__MODULE__, url: url, pid_mediator: pid_mediator, pid_analyzer: pid_analyzer)
   end
 
   def init([url: url, pid_mediator: pid_mediator, pid_analyzer: pid_analyzer]) do
-    IO.puts "Connecting to stream..."
+    Logger.info("Connecting to stream...")
     HTTPoison.get!(url, [], [recv_timeout: :infinity, stream_to: self()])
     {:ok, {pid_mediator, pid_analyzer}}
   end
@@ -17,7 +16,8 @@ defmodule SseClient do
   def handle_info(%HTTPoison.AsyncChunk{chunk: chunk}, {pid_mediator, pid_analyzer}) do
     case Regex.run(~r/data: ({.+})\n\n$/, chunk) do
       [_, data] ->
-        with {:ok, chunk_result} <- JSON.decode(data) do
+        with {:ok, chunk_result} <- JSON.decode(data)
+        do
           hashtags = Enum.map(chunk_result["message"]["tweet"]["entities"]["hashtags"], fn x -> Map.get(x, "text") end)
           case hashtags do
             [] ->
@@ -26,6 +26,8 @@ defmodule SseClient do
               GenServer.cast(pid_analyzer, {:new_hashtags, hashtags})
           end
           GenServer.cast(pid_mediator, {:mediate, chunk_result["message"]["tweet"]["text"]})
+        else
+          {_, _chunk_result} -> GenServer.cast(pid_mediator, :crash)
         end
       nil ->
         raise "Don't know how to parse received chunk: \"#{chunk}\""

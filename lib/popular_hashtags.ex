@@ -1,18 +1,19 @@
 defmodule AnalyzeTweets do
   use GenServer
+  require Logger
 
   def start() do
     GenServer.start_link(__MODULE__, [], [])
   end
 
   def init(_state) do
-    Process.send_after(self(), :print_popular_hashtag, 5000)
+    Process.send_after(self(), :print_popular_hashtag, 5_000)
     {:ok, %{hashtags: [], popular_hashtag: nil}}
   end
 
   def handle_info(:print_popular_hashtag, state) do
-    IO.puts("The most popular hashtag in the last 5 seconds is: #{state.popular_hashtag}")
-    Process.send_after(self(), :print_popular_hashtag, 5000)
+    Logger.info("The most popular hashtag in the last 5 seconds is: #{state.popular_hashtag}", ansi_color: :blue)
+    Process.send_after(self(), :print_popular_hashtag, 5_000)
     {:noreply, %{hashtags: [], popular_hashtag: nil}}
   end
 
