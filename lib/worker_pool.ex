@@ -6,7 +6,9 @@ defmodule WorkerPool do
   end
 
   def init(workers_count) do
-    children = Enum.map(1..workers_count, fn x -> %{id: x, start: {Printer, :start, [:"printer_#{x}"] } } end)
+    children = Enum.map(1..workers_count, fn x ->
+          %{id: x, start: {Printer, :start, [:"printer_#{x}"] } } end) ++
+          [%{id: :analyzer, start: {AnalyzeTweets, :start, [:analyzer]}}]
     Supervisor.init(children, strategy: :one_for_one)
   end
 
