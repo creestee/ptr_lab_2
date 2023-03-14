@@ -2,7 +2,6 @@ defmodule LoadBalancer do
   use GenServer
 
   def init(_) do
-    WorkerPool.start_link(3)
     {:ok, nil}
   end
 
