@@ -22,7 +22,8 @@ defmodule PtrLab2.MixProject do
   defp deps do
     [
       {:httpoison, "~> 2.0"},
-      {:json, "~> 1.4"}
+      {:json, "~> 1.4"},
+      {:statistics, "~> 0.6.2"}
     ]
   end
 end
