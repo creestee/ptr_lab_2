@@ -2,8 +2,8 @@ defmodule AnalyzeTweets do
   use GenServer
   require Logger
 
-  def start() do
-    GenServer.start_link(__MODULE__, [], [])
+  def start(name) do
+    GenServer.start_link(__MODULE__, [], name: name)
   end
 
   def init(_state) do

@@ -9,7 +9,7 @@ defmodule TwitterSupervisor do
     children = [
       %{
         id: :mediator,
-        start: {Mediator, :start_link, [[]]}
+        start: {LoadBalancer, :start_link, [[]]}
       },
       %{
         id: :sse_client_1,
@@ -19,9 +19,6 @@ defmodule TwitterSupervisor do
         id: :sse_client_2,
         start: {SseClient, :start_link, [["localhost:4000/tweets/2", :mediator]]}
       }
-      # {Mediator, []},
-      # {SseClient, ["localhost:4000/tweets/1", :mediator]}
-      # # {SseClient, ["localhost:4000/tweets/2", :mediator]}
     ]
 
     Supervisor.init(children, strategy: :one_for_one)
