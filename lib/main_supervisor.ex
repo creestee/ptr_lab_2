@@ -8,6 +8,10 @@ defmodule TwitterSupervisor do
   def init(_init_arg) do
     children = [
       %{
+        id: :pool,
+        start: {WorkerPool, :start_link, [3]}
+      },
+      %{
         id: :mediator,
         start: {LoadBalancer, :start_link, [[]]}
       },
