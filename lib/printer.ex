@@ -39,7 +39,7 @@ defmodule Printer do
         json_bad_words = load_json("./lib/util/badwords.json")["en"] ++
                          load_json("./lib/util/badwords.json")["es"]
 
-        IO.puts("#{printer_id} -- #{filter_bad_words(chunk_result["message"]["tweet"]["text"], json_bad_words)}")
+        # IO.puts("#{printer_id} -- #{filter_bad_words(chunk_result["message"]["tweet"]["text"], json_bad_words)}")
 
       {:error, _} ->
         Logger.warn("#{printer_id} has crashed...")

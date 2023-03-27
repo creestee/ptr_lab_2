@@ -12,12 +12,14 @@ defmodule SseClient do
     {:ok, pid_mediator}
   end
 
+  def handle_info(%HTTPoison.AsyncChunk{chunk: ""}, pid_mediator) do
+    {:noreply, pid_mediator}
+  end
+
   def handle_info(%HTTPoison.AsyncChunk{chunk: chunk}, pid_mediator) do
     case Regex.run(~r/data: ({.+})\n\n$/, chunk) do
       [_, data] ->
         GenServer.cast(pid_mediator, {:mediate, data})
-      nil ->
-        raise "Don't know how to parse received chunk: \"#{chunk}\""
     end
     {:noreply, pid_mediator}
   end

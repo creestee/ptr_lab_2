@@ -12,7 +12,7 @@ defmodule AnalyzeTweets do
   end
 
   def handle_info(:print_popular_hashtag, state) do
-    Logger.info("The most popular hashtag in the last 5 seconds is: #{state.popular_hashtag}", ansi_color: :blue)
+    Logger.info("\e[38;5;208mThe most popular hashtag in the last 5 seconds is:\e[0m #{state.popular_hashtag}")
     Process.send_after(self(), :print_popular_hashtag, 5_000)
     {:noreply, %{hashtags: [], popular_hashtag: nil}}
   end
