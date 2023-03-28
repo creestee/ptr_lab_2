@@ -9,7 +9,15 @@ defmodule TwitterSupervisor do
     children = [
       %{
         id: :pool,
-        start: {WorkerPool, :start_link, [3]}
+        start: {WorkerPool, :start_link, [4]}
+      },
+      %{
+        id: :analyzer,
+        start: {AnalyzeTweets, :start, [:analyzer]}
+      },
+      %{
+        id: :manager,
+        start: {PoolManager, :start_link, [{2, 6, 100}]}
       },
       %{
         id: :mediator,
