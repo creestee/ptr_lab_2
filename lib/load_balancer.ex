@@ -12,9 +12,9 @@ defmodule LoadBalancer do
   def handle_cast({:mediate, message}, _state) do
     GenServer.cast(smallest_queue_pid(Enum.map(Supervisor.which_children(WorkerPool), fn {_, pid, _, _} -> pid end)), {:print, message})
 
-    Enum.map(Supervisor.which_children(WorkerPool), fn {_, pid, _, _} -> pid end)
-    |> Enum.map(fn pid -> {pid, Process.info(pid, :message_queue_len)} end)
-    |> IO.inspect
+    # Enum.map(Supervisor.which_children(WorkerPool), fn {_, pid, _, _} -> pid end)
+    # |> Enum.map(fn pid -> {pid, Process.info(pid, :message_queue_len)} end)
+    # |> IO.inspect
 
     {:noreply, nil}
   end
