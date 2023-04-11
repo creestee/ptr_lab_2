@@ -36,16 +36,45 @@ defmodule Printer do
             GenServer.cast(:analyzer, {:new_hashtags, hashtags})
         end
 
-        json_bad_words = load_json("./lib/util/badwords.json")["en"] ++
-                         load_json("./lib/util/badwords.json")["es"]
+        text = filter_bad_words(chunk_result["message"]["tweet"]["text"], load_json("./lib/util/badwords.json")["en"])
+        words = String.split(text)
+        sentiment_scores_sum =
+          words |> Enum.reduce(0, fn word, acc ->
+            acc + Map.get(emotional_score_map(), word, 0)
+          end)
 
-        # IO.puts("#{printer_id} -- #{filter_bad_words(chunk_result["message"]["tweet"]["text"], json_bad_words)}")
+        sentiment_score = sentiment_scores_sum / length(words)
 
+        favorite_count = chunk_result["message"]["tweet"]["retweeted_status"]["favorite_count"] || 0
+        retweet_count = chunk_result["message"]["tweet"]["retweeted_status"]["retweet_count"] || 0
+        followers_count = chunk_result["message"]["tweet"]["user"]["followers_count"]
+
+        engagement_score =
+          cond do
+            followers_count == 0 ->
+              0
+            followers_count != 0 ->
+              (favorite_count + retweet_count) / followers_count
+          end
+
+        # IO.inspect engagement_score
       {:error, _} ->
-        Logger.warn("#{printer_id} has crashed...")
+        # Logger.warn("#{printer_id} has crashed...")
         Process.exit(self(), :kill)
     end
 
     {:noreply, printer_id}
+  end
+
+  defp emotional_score_map() do
+    %{body: response} = HTTPoison.get!("http://localhost:4000/emotion_values")
+
+    response
+      |> String.split("\r\n")
+      |> Enum.map(fn string ->
+        [key, value] = String.split(string, "\t")
+        {key, String.to_integer(value)}
+      end)
+      |> Enum.into(%{})
   end
 end
