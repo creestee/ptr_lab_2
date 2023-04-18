@@ -34,13 +34,13 @@ defmodule PoolManager do
       current_num_children < min_workers_limit ->
         Supervisor.start_child(WorkerPool, %{
           id: current_num_children + 1,
-          start: {Printer, :start, [:"printer_#{current_num_children + 1}"]}
+          start: {Worker, :start, [:"worker_#{current_num_children + 1}"]}
         })
 
       current_avg_tasks > average_num_tasks && current_num_children < max_workers_limit ->
         Supervisor.start_child(WorkerPool, %{
           id: current_num_children + 1,
-          start: {Printer, :start, [:"printer_#{current_num_children + 1}"]}
+          start: {Worker, :start, [:"worker_#{current_num_children + 1}"]}
         })
         # Logger.info("\e[30;144;255mAdded worker:\e[0m :printer_#{current_num_children + 1}")
 
@@ -52,11 +52,6 @@ defmodule PoolManager do
       true ->
         nil
     end
-
-    # Logger.info %{
-    #   children_alive: current_num_children,
-    #   current_avg_tasks: current_avg_tasks
-    # }
 
     Process.send_after(__MODULE__, :check, @delay_time)
     {:noreply, {min_workers_limit, max_workers_limit, average_num_tasks}}

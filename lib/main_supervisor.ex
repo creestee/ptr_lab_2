@@ -1,4 +1,4 @@
-defmodule TwitterSupervisor do
+defmodule MainSupervisor do
   use Supervisor
 
   def start_link() do

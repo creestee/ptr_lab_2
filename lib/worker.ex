@@ -1,4 +1,4 @@
-defmodule Printer do
+defmodule Worker do
   use GenServer
   require Logger
 
@@ -57,7 +57,13 @@ defmodule Printer do
               (favorite_count + retweet_count) / followers_count
           end
 
-        # IO.inspect engagement_score
+        %{
+          :sentiment_score => sentiment_score,
+          :engagement_score => engagement_score,
+          :tweet_text => text
+        }
+        |> IO.inspect
+
       {:error, _} ->
         # Logger.warn("#{printer_id} has crashed...")
         Process.exit(self(), :kill)
