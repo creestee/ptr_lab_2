@@ -1,4 +1,4 @@
-defmodule TwitterSupervisor do
+defmodule MainSupervisor do
   use Supervisor
 
   def start_link() do
@@ -10,6 +10,10 @@ defmodule TwitterSupervisor do
       %{
         id: :pool,
         start: {WorkerPool, :start_link, [4]}
+      },
+      %{
+        id: :batcher,
+        start: {Batcher, :start_link, [20]}
       },
       %{
         id: :analyzer,
