@@ -8,8 +8,8 @@ defmodule Worker do
     GenServer.start_link(__MODULE__, name, name: name)
   end
 
-  def init(printer_id) do
-    {:ok, printer_id}
+  def init(worker_id) do
+    {:ok, worker_id}
   end
 
   defp load_json(file) do
@@ -23,7 +23,7 @@ defmodule Worker do
     |> Enum.join(" ")
   end
 
-  def handle_cast({:print, message}, printer_id) do
+  def handle_cast({:print, message}, worker_id) do
     Process.sleep(trunc(Statistics.Distributions.Poisson.rand(25)) * @range_multiplier)
 
     case JSON.decode(message) do
@@ -37,6 +37,9 @@ defmodule Worker do
         end
 
         text = filter_bad_words(chunk_result["message"]["tweet"]["text"], load_json("./lib/util/badwords.json")["en"])
+
+        GenServer.cast(:batcher, {:collect, text})
+
         words = String.split(text)
         sentiment_scores_sum =
           words |> Enum.reduce(0, fn word, acc ->
@@ -57,19 +60,19 @@ defmodule Worker do
               (favorite_count + retweet_count) / followers_count
           end
 
-        %{
-          :sentiment_score => sentiment_score,
-          :engagement_score => engagement_score,
-          :tweet_text => text
-        }
-        |> IO.inspect
+        # %{
+        #   :sentiment_score => sentiment_score,
+        #   :engagement_score => engagement_score,
+        #   :tweet_text => text
+        # }
+        # |> IO.inspect
 
       {:error, _} ->
         # Logger.warn("#{printer_id} has crashed...")
         Process.exit(self(), :kill)
     end
 
-    {:noreply, printer_id}
+    {:noreply, worker_id}
   end
 
   defp emotional_score_map() do
