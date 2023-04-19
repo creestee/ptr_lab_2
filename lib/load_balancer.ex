@@ -14,9 +14,13 @@ defmodule LoadBalancer do
     {:noreply, nil}
   end
 
+  defp get_pid_queue_len(pid) when is_pid(pid) do
+    Process.info(pid, :message_queue_len)
+  end
+
   defp smallest_queue_pid(worker_pids) do
     worker_pids
-    |> Enum.map(fn pid -> {pid, Process.info(pid, :message_queue_len)} end)
+    |> Enum.map(fn pid -> {pid, get_pid_queue_len(pid)} end)
     |> Enum.min_by(fn {_, {_, queue_len}} -> queue_len end)
     |> elem(0)
   end

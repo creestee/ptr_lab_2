@@ -13,7 +13,7 @@ defmodule MainSupervisor do
       },
       %{
         id: :batcher,
-        start: {Batcher, :start_link, [20]}
+        start: {Batcher, :start_link, [4]}
       },
       %{
         id: :analyzer,
